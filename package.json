@@ -10,8 +10,13 @@
     "test": "jest"
   },
   "dependencies": {
+    "@react-navigation/bottom-tabs": "^7.3.10",
+    "@react-navigation/native-stack": "^7.3.10",
+    "@reduxjs/toolkit": "^2.6.1",
     "react": "19.0.0",
-    "react-native": "0.79.1"
+    "react-native": "0.79.1",
+    "react-native-maps": "^1.21.0",
+    "react-native-mmkv": "^3.2.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
