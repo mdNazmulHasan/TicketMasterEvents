@@ -5,7 +5,7 @@ import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 
 // Main stack param list
 export type RootStackParamList = {
-  Tabs: NavigatorScreenParams<TabParamList>; // Contains the tab navigator
+  Home: NavigatorScreenParams<TabParamList>; // Contains the tab navigator
   Detail: { id: string }; // Detail screen with required id parameter
 };
 

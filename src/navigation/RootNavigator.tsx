@@ -10,7 +10,7 @@ const RootNavigator: React.FC = () => {
   return (
     <Stack.Navigator>
       <Stack.Screen
-        name="Tabs"
+        name="Home"
         component={TabNavigator}
         options={{headerShown: false}}
       />
