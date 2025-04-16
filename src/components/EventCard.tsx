@@ -15,8 +15,12 @@ const EventCard: React.FC<EventCardProps> = ({event, onPress}) => {
   const classificationText = getClassificationText(event);
 
   return (
-    <TouchableOpacity onPress={onPress} style={styles.card}>
-      {imageUrl && <Image source={{uri: imageUrl}} style={styles.image} />}
+    <TouchableOpacity onPress={onPress} style={styles.card} activeOpacity={0.8}>
+      {imageUrl ? (
+        <Image source={{uri: imageUrl}} style={styles.image} />
+      ) : (
+        <View style={styles.imagePlaceholder} />
+      )}
       <View style={styles.content}>
         <Text style={styles.title} numberOfLines={2}>
           {event.name}
@@ -79,6 +83,13 @@ const styles = StyleSheet.create({
   image: {
     width: 100,
     height: 100,
+    borderRadius: 8,
+  },
+  imagePlaceholder: {
+    width: 100,
+    height: 100,
+    backgroundColor: '#ccc',
+    borderRadius: 8,
   },
   content: {
     flex: 1,
