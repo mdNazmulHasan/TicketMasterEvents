@@ -1,4 +1,4 @@
-import React, {useMemo} from 'react';
+import React, {useMemo, useState} from 'react';
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
   StyleSheet,
   Pressable,
   Platform,
+  Animated,
 } from 'react-native';
 import MapView, {Marker} from 'react-native-maps';
 import {useGetEventDetailsQuery} from '../services/eventApi';
@@ -34,9 +35,27 @@ const DetailsScreen: React.FC<DetailsScreenProps> = ({route}) => {
   );
   const colors = useColors();
 
+  // Create an animated value for the favorite button
+  const [scaleAnim] = useState(new Animated.Value(1));
+
   const isFavorited = Boolean(favorites?.[id]);
 
   const toggleFavorite = () => {
+    // Sequence animation: scale up, then reset to 1
+    Animated.sequence([
+      Animated.timing(scaleAnim, {
+        toValue: 1.2, // Scale up when added, scale back when removed
+        duration: 150, // Faster animation (adjust the duration as needed)
+        useNativeDriver: true,
+      }),
+      Animated.timing(scaleAnim, {
+        toValue: 1, // Reset the scale to normal after scaling
+        duration: 100, // Faster reset
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    // Toggle favorite state
     setFavorites(prev => {
       const updated = {...(prev || {})};
       isFavorited ? delete updated[id] : (updated[id] = event);
@@ -172,7 +191,10 @@ const DetailsScreen: React.FC<DetailsScreenProps> = ({route}) => {
             </Pressable>
           )}
 
-          <FavoriteText isFavorite={isFavorited} onPress={toggleFavorite} />
+          {/* Animated Favorite Button */}
+          <Animated.View style={{transform: [{scale: scaleAnim}]}}>
+            <FavoriteText isFavorite={isFavorited} onPress={toggleFavorite} />
+          </Animated.View>
         </View>
 
         {location && Platform.OS === 'ios' && (
@@ -231,9 +253,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 8,
   },
-  pressed: {
-    opacity: 0.7,
-  },
+  pressed: {opacity: 0.7},
   text: {
     fontSize: 16,
     fontWeight: '500',

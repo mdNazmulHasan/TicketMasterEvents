@@ -8,13 +8,23 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const RootNavigator: React.FC = () => {
   return (
-    <Stack.Navigator>
+    <Stack.Navigator
+      screenOptions={{
+        animation: 'fade',
+      }}>
       <Stack.Screen
         name="Home"
         component={TabNavigator}
         options={{headerShown: false}}
       />
-      <Stack.Screen name="Detail" component={DetailsScreen} />
+      <Stack.Screen
+        name="Detail"
+        component={DetailsScreen}
+        options={{
+          presentation: 'card',
+          animation: 'fade',
+        }}
+      />
     </Stack.Navigator>
   );
 };
