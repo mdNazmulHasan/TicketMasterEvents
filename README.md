@@ -4,12 +4,10 @@ A React Native mobile application for discovering and saving your favorite event
 
 ## Screenshots
 
-<div style="display: flex; justify-content: space-around; flex-wrap: wrap;">
-  <img src="https://prnt.sc/Zbc3f6hTaB6m" alt="Events Screen" width="180" />
-  <img src="/api/placeholder/180/360" alt="Search Results" width="180" />
-  <img src="/api/placeholder/180/360" alt="Event Details" width="180" />
-  <img src="/api/placeholder/180/360" alt="Favorites Screen" width="180" />
-</div>
+| Events Screen | Search Results | Event Details | Favorites Screen |
+|---------------|----------------|----------------|------------------|
+| ![Events](https://prnt.sc/Zbc3f6hTaB6m) | ![Search](https://yourdomain.com/search.png) | ![Details](https://yourdomain.com/details.png) | ![Favorites](https://yourdomain.com/favorites.png) |
+
 
 ## Features
 
