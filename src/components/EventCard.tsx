@@ -2,7 +2,7 @@ import React from 'react';
 import {View, Text, TouchableOpacity, Image, StyleSheet} from 'react-native';
 import {Event} from '../types/eventTypes';
 import {formatDate} from '../utils/helper';
-import Colors from '../styles/colors';
+import useColors from '../styles/colors';
 
 interface EventCardProps {
   event: Event;
@@ -10,30 +10,43 @@ interface EventCardProps {
 }
 
 const EventCard: React.FC<EventCardProps> = ({event, onPress}) => {
+  const colors = useColors();
   const imageUrl = getImageUrl(event);
   const date = formatDate(event.dates.start.localDate);
   const venueName = event._embedded?.venues?.[0]?.name;
   const classificationText = getClassificationText(event);
 
   return (
-    <TouchableOpacity onPress={onPress} style={styles.card} activeOpacity={0.8}>
+    <TouchableOpacity
+      onPress={onPress}
+      style={[styles.card, {backgroundColor: colors.card}]}
+      activeOpacity={0.8}>
       {imageUrl ? (
         <Image source={{uri: imageUrl}} style={styles.image} />
       ) : (
-        <View style={styles.imagePlaceholder} />
+        <View
+          style={[
+            styles.imagePlaceholder,
+            {backgroundColor: colors.placeholder},
+          ]}
+        />
       )}
       <View style={styles.content}>
-        <Text style={styles.title} numberOfLines={2}>
+        <Text style={[styles.title, {color: colors.text}]} numberOfLines={2}>
           {event.name}
         </Text>
-        <Text style={styles.date}>{date}</Text>
+        <Text style={[styles.date, {color: colors.subText}]}>{date}</Text>
         {classificationText && (
-          <Text style={styles.infoText} numberOfLines={1}>
+          <Text
+            style={[styles.infoText, {color: colors.subText}]}
+            numberOfLines={1}>
             {classificationText}
           </Text>
         )}
         {venueName && (
-          <Text style={styles.venue} numberOfLines={1}>
+          <Text
+            style={[styles.venue, {color: colors.subText}]}
+            numberOfLines={1}>
             {venueName}
           </Text>
         )}
@@ -77,7 +90,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginBottom: 12,
     borderRadius: 8,
-    backgroundColor: Colors.background,
     elevation: 2,
     overflow: 'hidden',
   },
@@ -89,7 +101,6 @@ const styles = StyleSheet.create({
   imagePlaceholder: {
     width: 100,
     height: 100,
-    backgroundColor: Colors.placeholder,
     borderRadius: 8,
   },
   content: {
@@ -103,17 +114,14 @@ const styles = StyleSheet.create({
   },
   date: {
     fontSize: 14,
-    color: Colors.subText,
     marginTop: 4,
   },
   infoText: {
     fontSize: 14,
-    color: Colors.info,
     marginTop: 2,
   },
   venue: {
     fontSize: 14,
-    color: Colors.subText,
     marginTop: 2,
   },
 });

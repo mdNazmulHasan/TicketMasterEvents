@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useMemo} from 'react';
 import {
   View,
   Text,
@@ -18,6 +18,7 @@ import {DetailsScreenProps} from '../navigation/types';
 import {useMMKVObject} from 'react-native-mmkv';
 import {storage} from '../utils/storage';
 import FavoriteText from '../components/FavoriteText';
+import useColors from '../styles/colors';
 
 const DetailsScreen: React.FC<DetailsScreenProps> = ({route}) => {
   const {id} = route.params;
@@ -27,22 +28,18 @@ const DetailsScreen: React.FC<DetailsScreenProps> = ({route}) => {
     isError,
     refetch,
   } = useGetEventDetailsQuery(id);
-
   const [favorites, setFavorites] = useMMKVObject<Record<string, any>>(
     'favorites',
     storage,
   );
+  const colors = useColors();
 
   const isFavorited = Boolean(favorites?.[id]);
 
   const toggleFavorite = () => {
     setFavorites(prev => {
       const updated = {...(prev || {})};
-      if (isFavorited) {
-        delete updated[id];
-      } else {
-        updated[id] = event;
-      }
+      isFavorited ? delete updated[id] : (updated[id] = event);
       return updated;
     });
   };
@@ -50,63 +47,53 @@ const DetailsScreen: React.FC<DetailsScreenProps> = ({route}) => {
   const handleRetry = () => refetch();
 
   const handleBuyTickets = () => {
-    if (event?.url?.startsWith('http')) {
-      Linking.openURL(event.url);
-    } else {
-      console.warn('Invalid URL');
-    }
+    if (event?.url?.startsWith('http')) Linking.openURL(event.url);
+    else console.warn('Invalid URL');
   };
+
+  const classificationText = useMemo(() => {
+    const c = event?.classifications?.[0];
+    return [
+      c?.segment?.name,
+      c?.genre?.name,
+      c?.subGenre?.name,
+      c?.type?.name,
+      c?.subType?.name,
+    ]
+      .filter(
+        part => typeof part === 'string' && part.trim() && part !== 'Undefined',
+      )
+      .join(' • ');
+  }, [event]);
 
   if (isLoading) {
     return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" />
+      <View style={[styles.centered, {backgroundColor: colors.background}]}>
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
 
   if (isError || !event) {
     return (
-      <View style={styles.centered}>
-        <Text>Error loading event details</Text>
-        <Button title="Retry" onPress={handleRetry} />
+      <View style={[styles.centered, {backgroundColor: colors.background}]}>
+        <Text style={{color: colors.error}}>Error loading event details</Text>
+        <Button title="Retry" onPress={handleRetry} color={colors.primary} />
       </View>
     );
   }
 
-  const {
-    name,
-    description,
-    images,
-    dates,
-    _embedded,
-    classifications,
-    priceRanges,
-    info,
-    url,
-  } = event;
+  const {name, description, images, dates, _embedded, priceRanges, info, url} =
+    event;
 
   const imageUrl = images?.[0]?.url;
   const venue = _embedded?.venues?.[0];
   const location = venue?.location;
-
-  const classification = classifications?.[0];
-  const classificationText = [
-    classification?.segment?.name,
-    classification?.genre?.name,
-    classification?.subGenre?.name,
-    classification?.type?.name,
-    classification?.subType?.name,
-  ]
-    .filter(
-      part => typeof part === 'string' && part.trim() && part !== 'Undefined',
-    )
-    .join(' • ');
-
   const price = priceRanges?.[0];
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView
+      style={[styles.container, {backgroundColor: colors.background}]}>
       {imageUrl && (
         <Image
           source={{uri: imageUrl}}
@@ -116,18 +103,25 @@ const DetailsScreen: React.FC<DetailsScreenProps> = ({route}) => {
       )}
 
       <View style={styles.content}>
-        <Text style={styles.title}>{name}</Text>
-        {description && <Text style={styles.infoText}>{description}</Text>}
+        <Text style={[styles.title, {color: colors.text}]}>{name}</Text>
 
-        <Text style={styles.infoText}>
+        {description && (
+          <Text style={[styles.infoText, {color: colors.subText}]}>
+            {description}
+          </Text>
+        )}
+
+        <Text style={[styles.infoText, {color: colors.text}]}>
           {formatDate(dates.start.localDate)}
           {dates.start.localTime && ` at ${dates.start.localTime}`}
         </Text>
 
         {venue && (
           <>
-            <Text style={styles.infoText}>{venue.name}</Text>
-            <Text style={styles.infoText}>
+            <Text style={[styles.infoText, {color: colors.text}]}>
+              {venue.name}
+            </Text>
+            <Text style={[styles.infoText, {color: colors.text}]}>
               {venue.city?.name},{' '}
               {venue.state?.stateCode || venue.country?.countryCode}
             </Text>
@@ -135,25 +129,31 @@ const DetailsScreen: React.FC<DetailsScreenProps> = ({route}) => {
         )}
 
         {location && (
-          <Text style={styles.infoText}>
+          <Text style={[styles.infoText, {color: colors.text}]}>
             Location: {location.latitude}, {location.longitude}
           </Text>
         )}
 
         {classificationText && (
-          <Text style={styles.infoText}>{classificationText}</Text>
+          <Text style={[styles.infoText, {color: colors.text}]}>
+            {classificationText}
+          </Text>
         )}
 
         {price && (
-          <Text style={styles.infoText}>
+          <Text style={[styles.infoText, {color: colors.text}]}>
             ${price.min} - ${price.max}
           </Text>
         )}
 
         {info && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>About the Event</Text>
-            <Text style={styles.description}>{info}</Text>
+            <Text style={[styles.sectionTitle, {color: colors.text}]}>
+              About the Event
+            </Text>
+            <Text style={[styles.description, {color: colors.subText}]}>
+              {info}
+            </Text>
           </View>
         )}
 
@@ -163,10 +163,12 @@ const DetailsScreen: React.FC<DetailsScreenProps> = ({route}) => {
               onPress={handleBuyTickets}
               style={({pressed}) => [
                 styles.button,
-                {backgroundColor: '#e6f0ff'},
+                {backgroundColor: colors.normalBg},
                 pressed && styles.pressed,
               ]}>
-              <Text style={[styles.text, {color: 'blue'}]}>Buy Tickets</Text>
+              <Text style={[styles.text, {color: colors.normalText}]}>
+                Buy Tickets
+              </Text>
             </Pressable>
           )}
 
@@ -222,16 +224,6 @@ const styles = StyleSheet.create({
     gap: 10,
     flexWrap: 'wrap',
   },
-  favButton: {
-    backgroundColor: '#eee',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 6,
-  },
-  favButtonText: {
-    fontSize: 16,
-    color: '#444',
-  },
   button: {
     marginBottom: 12,
     alignSelf: 'flex-start',
@@ -245,7 +237,6 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 16,
     fontWeight: '500',
-    textDecorationLine: 'none',
   },
 });
 

@@ -2,13 +2,14 @@
 import React from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {TabParamList} from './types';
-import Colors from '../styles/colors';
 import EventsScreen from '../screens/EventsScreen';
 import FavoritesScreen from '../screens/FavoritesScreen';
+import useColors from '../styles/colors';
 
 const Tab = createBottomTabNavigator<TabParamList>();
 
 const TabNavigator: React.FC = () => {
+  const Colors = useColors();
   return (
     <Tab.Navigator
       screenOptions={{
