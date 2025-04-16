@@ -11,8 +11,10 @@ import {
 import {useLazySearchEventsQuery} from '../services/eventApi';
 import EventCard from '../components/EventCard';
 import {EventsScreenProps} from '@navigation/types';
+import useColors from '../styles/colors';
 
 const EventsScreen: React.FC<EventsScreenProps> = ({navigation}) => {
+  const colors = useColors();
   const [keyword, setKeyword] = useState('');
   const [page, setPage] = useState(0);
   const [events, setEvents] = useState([]);
@@ -24,10 +26,7 @@ const EventsScreen: React.FC<EventsScreenProps> = ({navigation}) => {
     const nextPage = reset ? 0 : page + 1;
 
     try {
-      const newEvents = await triggerSearch({
-        keyword,
-        page: nextPage,
-      }).unwrap();
+      const newEvents = await triggerSearch({keyword, page: nextPage}).unwrap();
 
       if (reset) {
         setEvents(newEvents);
@@ -49,28 +48,56 @@ const EventsScreen: React.FC<EventsScreenProps> = ({navigation}) => {
 
   const handleSearch = () => {
     if (!keyword.trim()) return;
-    fetchEvents(true); // Reset search
+    fetchEvents(true);
   };
 
   const loadMoreEvents = () => {
     if (!hasMore || isFetching) return;
-    fetchEvents(); // Load next page
+    fetchEvents();
   };
 
+  const renderFooter = () =>
+    isFetching && page > 0 ? (
+      <ActivityIndicator
+        size="small"
+        color={colors.primary}
+        style={styles.footerLoader}
+      />
+    ) : null;
+
+  const renderEmpty = () =>
+    !isFetching && events.length === 0 ? (
+      <Text style={[styles.emptyText, {color: colors.subText}]}>
+        No events found.
+      </Text>
+    ) : null;
+
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, {backgroundColor: colors.background}]}>
       <TextInput
-        style={styles.input}
+        style={[styles.input, {color: colors.text, borderColor: colors.border}]}
         placeholder="Search events"
+        placeholderTextColor={colors.placeholder}
         value={keyword}
         onChangeText={setKeyword}
       />
-      <Button title="Search Events" onPress={handleSearch} disabled={!keyword.trim()} />
+      <Button
+        title="Search Events"
+        onPress={handleSearch}
+        disabled={!keyword.trim()}
+        color={colors.primary}
+      />
 
       {isError ? (
-        <Text style={styles.errorText}>Error loading events. Please try again.</Text>
+        <Text style={[styles.errorText, {color: colors.error}]}>
+          Error loading events. Please try again.
+        </Text>
       ) : isFetching && page === 0 ? (
-        <ActivityIndicator size="large" style={styles.loader} />
+        <ActivityIndicator
+          size="large"
+          color={colors.primary}
+          style={styles.loader}
+        />
       ) : (
         <FlatList
           data={events}
@@ -81,16 +108,12 @@ const EventsScreen: React.FC<EventsScreenProps> = ({navigation}) => {
               onPress={() => navigation.navigate('Detail', {id: item.id})}
             />
           )}
+          contentContainerStyle={{paddingBottom: 20, paddingTop: 20}}
           onEndReached={loadMoreEvents}
+          showsVerticalScrollIndicator={false}
           onEndReachedThreshold={0.5}
-          ListFooterComponent={
-            isFetching && page > 0 ? <ActivityIndicator size="small" style={{marginVertical: 10}} /> : null
-          }
-          ListEmptyComponent={
-            !isFetching && events.length === 0 ? (
-              <Text style={styles.emptyText}>No events found.</Text>
-            ) : null
-          }
+          ListFooterComponent={renderFooter}
+          ListEmptyComponent={renderEmpty}
         />
       )}
     </View>
@@ -98,17 +121,33 @@ const EventsScreen: React.FC<EventsScreenProps> = ({navigation}) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16 },
+  container: {
+    flex: 1,
+    padding: 16,
+  },
   input: {
     height: 40,
-    borderColor: 'gray',
     borderWidth: 1,
+    borderRadius: 8,
     marginBottom: 12,
-    paddingHorizontal: 8,
+    paddingHorizontal: 10,
   },
-  loader: { marginTop: 20 },
-  emptyText: { textAlign: 'center', marginTop: 20, fontSize: 16 },
-  errorText: { textAlign: 'center', marginTop: 20, fontSize: 16, color: 'red' },
+  loader: {
+    marginTop: 20,
+  },
+  footerLoader: {
+    marginVertical: 10,
+  },
+  emptyText: {
+    textAlign: 'center',
+    marginTop: 20,
+    fontSize: 16,
+  },
+  errorText: {
+    textAlign: 'center',
+    marginTop: 20,
+    fontSize: 16,
+  },
 });
 
 export default EventsScreen;
