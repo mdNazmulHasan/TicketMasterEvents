@@ -1,43 +1,36 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useCallback} from 'react';
 import {View, Text, FlatList, StyleSheet} from 'react-native';
 import {FavoritesScreenProps} from '../navigation/types';
 import {MMKV} from 'react-native-mmkv';
 import {Event} from '../types/eventTypes';
-import EventCard from '../components/EventCard'; // Assuming EventCard is imported
+import EventCard from '../components/EventCard';
+import useColors from '../styles/colors';
 
 const storage = new MMKV();
 
 const FavoritesScreen: React.FC<FavoritesScreenProps> = ({navigation}) => {
+  const colors = useColors();
   const [favorites, setFavorites] = useState<Event[]>([]);
-  const getSavedFavorites = () => {
+
+  const getSavedFavorites = useCallback(() => {
     const stored = storage.getString('favorites');
+    if (!stored) return setFavorites([]);
 
-    if (stored) {
-      try {
-        // Parse the stored string to an object
-        const parsed = JSON.parse(stored);
-
-        // Convert object into an array of events
-        const favoriteEvents = Object.values(parsed);
-
-        setFavorites(favoriteEvents);
-      } catch (e) {
-        console.error('Failed to parse favorites from storage', e);
-      }
-    } else {
-      console.log('🚀 No favorites found in storage'); // Debugging log
+    try {
+      const parsed = JSON.parse(stored);
+      const favoriteEvents: Event[] = Object.values(parsed);
+      setFavorites(favoriteEvents);
+    } catch (error) {
+      console.error('❌ Failed to parse favorites from storage:', error);
+      setFavorites([]);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    // Retrieve favorite events from storage
     getSavedFavorites();
-    const unsubscribe = navigation.addListener('focus', () => {
-      // Refresh favorites when the screen is focused
-      getSavedFavorites();
-    });
+    const unsubscribe = navigation.addListener('focus', getSavedFavorites);
     return unsubscribe;
-  }, [navigation]);
+  }, [navigation, getSavedFavorites]);
 
   const renderItem = ({item}: {item: Event}) => (
     <EventCard
@@ -47,16 +40,18 @@ const FavoritesScreen: React.FC<FavoritesScreenProps> = ({navigation}) => {
   );
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, {backgroundColor: colors.background}]}>
       {favorites.length > 0 ? (
         <FlatList
           data={favorites}
           keyExtractor={item => item.id}
           renderItem={renderItem}
-          contentContainerStyle={{paddingBottom: 20}}
+          contentContainerStyle={styles.listContent}
         />
       ) : (
-        <Text style={styles.noFavText}>You have no favorite events yet.</Text>
+        <Text style={[styles.noFavText, {color: colors.subText}]}>
+          You have no favorite events yet.
+        </Text>
       )}
     </View>
   );
@@ -66,19 +61,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: '#fff',
-  },
-  title: {
-    fontSize: 26,
-    fontWeight: 'bold',
-    marginBottom: 16,
-    textAlign: 'center',
   },
   noFavText: {
     textAlign: 'center',
     fontSize: 16,
     marginTop: 40,
-    color: '#666',
+  },
+  listContent: {
+    paddingBottom: 20,
   },
 });
 
