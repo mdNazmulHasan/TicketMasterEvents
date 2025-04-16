@@ -5,25 +5,27 @@ import {formatDate} from '../utils/helper';
 import useColors from '../styles/colors';
 
 interface EventCardProps {
-  event: Event;
-  onPress: () => void;
+  event: Event; // Event object containing event details
+  onPress: () => void; // Callback when the card is pressed
 }
 
 const EventCard: React.FC<EventCardProps> = ({event, onPress}) => {
-  const colors = useColors();
-  const imageUrl = getImageUrl(event);
-  const date = formatDate(event.dates.start.localDate);
-  const venueName = event._embedded?.venues?.[0]?.name;
-  const classificationText = getClassificationText(event);
+  const colors = useColors(); // Get theme-based colors (e.g., dark/light mode)
+  const imageUrl = getImageUrl(event); // Get preferred image URL
+  const date = formatDate(event.dates.start.localDate); // Format event date
+  const venueName = event._embedded?.venues?.[0]?.name; // Safely get venue name
+  const classificationText = getClassificationText(event); // Get classification summary
 
   return (
     <TouchableOpacity
       onPress={onPress}
       style={[styles.card, {backgroundColor: colors.card}]}
-      activeOpacity={0.8}>
+      activeOpacity={0.8} // Slight opacity when pressed
+    >
       {imageUrl ? (
         <Image source={{uri: imageUrl}} style={styles.image} />
       ) : (
+        // Placeholder if image is missing
         <View
           style={[
             styles.imagePlaceholder,
@@ -32,10 +34,15 @@ const EventCard: React.FC<EventCardProps> = ({event, onPress}) => {
         />
       )}
       <View style={styles.content}>
+        {/* Event title */}
         <Text style={[styles.title, {color: colors.text}]} numberOfLines={2}>
           {event.name}
         </Text>
+
+        {/* Event date */}
         <Text style={[styles.date, {color: colors.subText}]}>{date}</Text>
+
+        {/* Classification (genre/type) */}
         {classificationText && (
           <Text
             style={[styles.infoText, {color: colors.subText}]}
@@ -43,6 +50,8 @@ const EventCard: React.FC<EventCardProps> = ({event, onPress}) => {
             {classificationText}
           </Text>
         )}
+
+        {/* Venue name */}
         {venueName && (
           <Text
             style={[styles.venue, {color: colors.subText}]}
@@ -57,6 +66,7 @@ const EventCard: React.FC<EventCardProps> = ({event, onPress}) => {
 
 // ===== Helper Functions =====
 
+// Extract a suitable image URL, preferring 3:2 ratio
 const getImageUrl = (event: Event): string | undefined => {
   return (
     event.images?.find(img => img.ratio === '3_2')?.url ||
@@ -64,6 +74,7 @@ const getImageUrl = (event: Event): string | undefined => {
   );
 };
 
+// Build classification string (e.g., Music • Rock • Alternative)
 const getClassificationText = (event: Event): string => {
   const classification = event.classifications?.[0];
 
@@ -87,11 +98,12 @@ const getClassificationText = (event: Event): string => {
 
 const styles = StyleSheet.create({
   card: {
-    flexDirection: 'row',
+    flexDirection: 'row', // Layout image + text side by side
     marginBottom: 12,
     borderRadius: 8,
-    elevation: 2,
+    elevation: 2, // Shadow for Android
     overflow: 'hidden',
+    padding: 10,
   },
   image: {
     width: 100,
