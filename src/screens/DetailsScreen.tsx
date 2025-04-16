@@ -15,7 +15,16 @@ import {DetailsScreenProps} from '../navigation/types';
 
 const DetailsScreen: React.FC<DetailsScreenProps> = ({route}) => {
   const {id} = route.params;
-  const {data: event, isLoading, isError} = useGetEventDetailsQuery(id);
+  const {
+    data: event,
+    isLoading,
+    isError,
+    refetch,
+  } = useGetEventDetailsQuery(id);
+
+  const handleRetry = () => {
+    refetch();
+  };
 
   if (isLoading) {
     return (
@@ -29,12 +38,14 @@ const DetailsScreen: React.FC<DetailsScreenProps> = ({route}) => {
     return (
       <View style={styles.centered}>
         <Text>Error loading event details</Text>
+        <Button title="Retry" onPress={handleRetry} />
       </View>
     );
   }
 
   const {
     name,
+    description,
     images,
     dates,
     _embedded,
@@ -45,7 +56,9 @@ const DetailsScreen: React.FC<DetailsScreenProps> = ({route}) => {
   } = event;
 
   const venue = _embedded?.venues?.[0];
+  const location = venue?.location;
   const classification = classifications?.[0];
+
   const parts = [
     classification?.segment?.name,
     classification?.genre?.name,
@@ -58,10 +71,15 @@ const DetailsScreen: React.FC<DetailsScreenProps> = ({route}) => {
         typeof part === 'string' && part.trim() !== '' && part !== 'Undefined',
     )
     .join(' • ');
+
   const price = priceRanges?.[0];
 
   const handleBuyTickets = () => {
-    if (url) Linking.openURL(url);
+    if (url && (url.startsWith('http') || url.startsWith('https'))) {
+      Linking.openURL(url);
+    } else {
+      console.warn('Invalid URL');
+    }
   };
 
   return (
@@ -76,6 +94,7 @@ const DetailsScreen: React.FC<DetailsScreenProps> = ({route}) => {
 
       <View style={styles.content}>
         <Text style={styles.title}>{name}</Text>
+        <Text style={styles.infoText}>{description}</Text>
 
         <Text style={styles.infoText}>
           {formatDate(dates.start.localDate)}
@@ -89,14 +108,15 @@ const DetailsScreen: React.FC<DetailsScreenProps> = ({route}) => {
               {venue.city.name},{' '}
               {venue.state?.stateCode || venue.country?.countryCode}
             </Text>
+            {location && (
+              <Text style={styles.infoText}>
+                Location: {location.latitude}, {location.longitude}
+              </Text>
+            )}
           </>
         )}
 
-        {parts && (
-          <Text style={styles.infoText}>
-            {parts}
-          </Text>
-        )}
+        {parts && <Text style={styles.infoText}>{parts}</Text>}
 
         {price && (
           <Text style={styles.infoText}>

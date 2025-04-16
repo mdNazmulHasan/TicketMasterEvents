@@ -22,7 +22,7 @@ export const eventApi = createApi({
           keyword,
           page,
           size: 20,
-          sort: 'date,desc',
+          sort: 'date,asc',
         },
       }),
       transformResponse: (response: EventsResponse): Event[] =>

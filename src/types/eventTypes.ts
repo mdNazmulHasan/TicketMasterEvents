@@ -9,6 +9,11 @@ export interface Venue {
   country: {
     countryCode: string;
   };
+  location: Location;
+}
+export interface Location {
+  latitude: string; // or number depending on your use case
+  longitude: string; // or number
 }
 
 export interface Classification {
@@ -47,6 +52,7 @@ export interface Image {
 export interface Event {
   id: string;
   name: string;
+  description: string;
   url: string;
   images: Image[];
   dates: {
