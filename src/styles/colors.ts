@@ -14,6 +14,7 @@ const LightColors = {
   success: '#388e3c',
   warning: '#f57c00',
   info: '#1976d2',
+  placeholder: '#ccc',
 };
 
 const DarkColors = {
@@ -28,6 +29,7 @@ const DarkColors = {
   success: '#4caf50',
   warning: '#ff9800',
   info: '#2196f3',
+  placeholder: '#555',
 };
 
 const Colors = colorScheme === 'dark' ? DarkColors : LightColors;

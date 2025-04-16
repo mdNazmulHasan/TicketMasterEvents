@@ -2,6 +2,7 @@ import React from 'react';
 import {View, Text, TouchableOpacity, Image, StyleSheet} from 'react-native';
 import {Event} from '../types/eventTypes';
 import {formatDate} from '../utils/helper';
+import Colors from '../styles/colors';
 
 interface EventCardProps {
   event: Event;
@@ -76,7 +77,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginBottom: 12,
     borderRadius: 8,
-    backgroundColor: '#fff',
+    backgroundColor: Colors.background,
     elevation: 2,
     overflow: 'hidden',
   },
@@ -88,7 +89,7 @@ const styles = StyleSheet.create({
   imagePlaceholder: {
     width: 100,
     height: 100,
-    backgroundColor: '#ccc',
+    backgroundColor: Colors.placeholder,
     borderRadius: 8,
   },
   content: {
@@ -102,17 +103,17 @@ const styles = StyleSheet.create({
   },
   date: {
     fontSize: 14,
-    color: '#666',
+    color: Colors.subText,
     marginTop: 4,
   },
   infoText: {
     fontSize: 14,
-    color: '#444',
+    color: Colors.info,
     marginTop: 2,
   },
   venue: {
     fontSize: 14,
-    color: '#333',
+    color: Colors.subText,
     marginTop: 2,
   },
 });
