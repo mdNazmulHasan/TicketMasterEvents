@@ -1,12 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  StyleSheet,
-  Image,
-} from 'react-native';
+import {View, Text, FlatList, StyleSheet} from 'react-native';
 import {FavoritesScreenProps} from '../navigation/types';
 import {MMKV} from 'react-native-mmkv';
 import {Event} from '../types/eventTypes';
@@ -19,7 +12,6 @@ const FavoritesScreen: React.FC<FavoritesScreenProps> = ({navigation}) => {
 
   useEffect(() => {
     const stored = storage.getString('favorites');
-    console.log('🚀 Stored favorites:', stored); // Debugging log
 
     if (stored) {
       try {
@@ -29,7 +21,6 @@ const FavoritesScreen: React.FC<FavoritesScreenProps> = ({navigation}) => {
         // Convert object into an array of events
         const favoriteEvents = Object.values(parsed);
 
-        console.log('🚀 Parsed favorites:', favoriteEvents); // Debugging log
         setFavorites(favoriteEvents);
       } catch (e) {
         console.error('Failed to parse favorites from storage', e);
