@@ -12,6 +12,7 @@ import {
 import {useGetEventDetailsQuery} from '../services/eventApi';
 import {formatDate} from '../utils/helper';
 import {DetailsScreenProps} from '../navigation/types';
+import MapView, {Marker} from 'react-native-maps';
 
 const DetailsScreen: React.FC<DetailsScreenProps> = ({route}) => {
   const {id} = route.params;
@@ -132,6 +133,27 @@ const DetailsScreen: React.FC<DetailsScreenProps> = ({route}) => {
         )}
 
         {url && <Button title="Buy Tickets" onPress={handleBuyTickets} />}
+        {location && (
+          <View style={styles.mapContainer}>
+            <MapView
+              style={styles.map}
+              initialRegion={{
+                latitude: parseFloat(location.latitude),
+                longitude: parseFloat(location.longitude),
+                latitudeDelta: 0.01,
+                longitudeDelta: 0.01,
+              }}>
+              <Marker
+                coordinate={{
+                  latitude: parseFloat(location.latitude),
+                  longitude: parseFloat(location.longitude),
+                }}
+                title={venue?.name}
+                description={venue?.city?.name}
+              />
+            </MapView>
+          </View>
+        )}
       </View>
     </ScrollView>
   );
@@ -173,6 +195,15 @@ const styles = StyleSheet.create({
   description: {
     fontSize: 15,
     lineHeight: 22,
+  },
+  mapContainer: {
+    height: 200,
+    marginVertical: 16,
+    borderRadius: 8,
+    overflow: 'hidden',
+  },
+  map: {
+    ...StyleSheet.absoluteFillObject,
   },
 });
 
