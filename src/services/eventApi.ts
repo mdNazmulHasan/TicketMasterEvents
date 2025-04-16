@@ -1,12 +1,10 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { EventsResponse, Event } from '../types/eventTypes';
 
-// Use a fallback for development if the env var is undefined
 const API_KEY = process.env.TICKETMASTER_API_KEY ?? '';
 
 interface SearchEventsArgs {
-  city: string;
-  keyword?: string;
+  keyword: string;
   page?: number;
 }
 
@@ -17,15 +15,14 @@ export const eventApi = createApi({
   }),
   endpoints: builder => ({
     searchEvents: builder.query<Event[], SearchEventsArgs>({
-      query: ({ city, keyword = '', page = 0 }) => ({
+      query: ({ keyword, page = 0 }) => ({
         url: 'events.json',
         params: {
           apikey: API_KEY,
-          city,
           keyword,
           page,
           size: 20,
-          sort: 'date,asc',
+          sort: 'date,desc',
         },
       }),
       transformResponse: (response: EventsResponse): Event[] =>
