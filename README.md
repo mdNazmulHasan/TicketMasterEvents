@@ -1,4 +1,4 @@
-# Event Finder App
+# TicketMasterEvents
 
 A React Native mobile application for discovering and saving your favorite events using the Ticketmaster API.
 
@@ -55,8 +55,8 @@ src/
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/event-finder-app.git
-   cd event-finder-app
+   git clone https://github.com/mdNazmulHasan/TicketMasterEvents.git
+   cd TicketMasterEvents
    ```
 
 2. Install dependencies:
@@ -118,19 +118,11 @@ The app includes a custom theme system that:
 
 ### Navigation Architecture
 
-React Navigation v6 was implemented with:
+React Navigation v7 was implemented with:
 
 1. **Tab-based Main Flow**: Easy access to discover and favorites sections.
 2. **Stack Navigation**: Proper history management when viewing event details.
 3. **Type Safety**: Full TypeScript support for navigation props.
-
-## Future Improvements
-
-- Add location-based event discovery
-- Implement user authentication
-- Add calendar integration for saved events
-- Create push notifications for upcoming favorited events
-- Add ticket purchasing through deep linking
 
 ## Demo Video
 
@@ -138,7 +130,7 @@ React Navigation v6 was implemented with:
 
 ## License
 
-MIT © [Your Name]
+MIT © [mdNazmulHasan]
 
 ## Acknowledgements
 
