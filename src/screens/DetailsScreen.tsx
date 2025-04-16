@@ -1,32 +1,147 @@
 import React from 'react';
-import {View, Text, Button, StyleSheet} from 'react-native';
+import {
+  View,
+  Text,
+  Image,
+  ScrollView,
+  Linking,
+  ActivityIndicator,
+  Button,
+  StyleSheet,
+} from 'react-native';
+import {useGetEventDetailsQuery} from '../services/eventApi';
+import {formatDate} from '../utils/helper';
 import {DetailsScreenProps} from '../navigation/types';
 
-const DetailsScreen: React.FC<DetailsScreenProps> = ({navigation}) => {
+const DetailsScreen: React.FC<DetailsScreenProps> = ({route}) => {
+  const {id} = route.params;
+  const {data: event, isLoading, isError} = useGetEventDetailsQuery(id);
+
+  if (isLoading) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+
+  if (isError || !event) {
+    return (
+      <View style={styles.centered}>
+        <Text>Error loading event details</Text>
+      </View>
+    );
+  }
+
+  const {
+    name,
+    images,
+    dates,
+    _embedded,
+    classifications,
+    priceRanges,
+    info,
+    url,
+  } = event;
+
+  const venue = _embedded?.venues?.[0];
+  const genre = classifications?.[0]?.genre?.name;
+  const segment = classifications?.[0]?.segment?.name;
+  const price = priceRanges?.[0];
+
+  const handleBuyTickets = () => {
+    if (url) Linking.openURL(url);
+  };
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Detail Screen</Text>
-      <Button title="Go Back" onPress={() => navigation.goBack()} />
-    </View>
+    <ScrollView style={styles.container}>
+      {images?.[0]?.url && (
+        <Image
+          source={{uri: images[0].url}}
+          style={styles.eventImage}
+          resizeMode="cover"
+        />
+      )}
+
+      <View style={styles.content}>
+        <Text style={styles.title}>{name}</Text>
+
+        <Text style={styles.infoText}>
+          {formatDate(dates.start.localDate)}
+          {dates.start.localTime && ` at ${dates.start.localTime}`}
+        </Text>
+
+        {venue && (
+          <>
+            <Text style={styles.infoText}>{venue.name}</Text>
+            <Text style={styles.infoText}>
+              {venue.city.name},{' '}
+              {venue.state?.stateCode || venue.country?.countryCode}
+            </Text>
+          </>
+        )}
+
+        {(genre || segment) && (
+          <Text style={styles.infoText}>
+            {[genre, segment].filter(Boolean).join(' • ')}
+          </Text>
+        )}
+
+        {price && (
+          <Text style={styles.infoText}>
+            ${price.min} - ${price.max}
+          </Text>
+        )}
+
+        {info && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>About the Event</Text>
+            <Text style={styles.description}>{info}</Text>
+          </View>
+        )}
+
+        {url && <Button title="Buy Tickets" onPress={handleBuyTickets} />}
+      </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  centered: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+  },
+  eventImage: {
+    width: '100%',
+    height: 200,
+  },
+  content: {
+    padding: 16,
   },
   title: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: 'bold',
-    marginBottom: 20,
+    marginBottom: 8,
   },
-  subtitle: {
+  infoText: {
+    fontSize: 16,
+    marginVertical: 4,
+  },
+  section: {
+    marginTop: 16,
+  },
+  sectionTitle: {
     fontSize: 18,
-    marginBottom: 20,
-    color: '#666',
+    fontWeight: 'bold',
+    marginBottom: 6,
+  },
+  description: {
+    fontSize: 15,
+    lineHeight: 22,
   },
 });
 
