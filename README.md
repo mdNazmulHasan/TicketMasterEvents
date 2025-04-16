@@ -1,97 +1,146 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# Event Finder App
 
-# Getting Started
+A React Native mobile application for discovering and saving your favorite events using the Ticketmaster API.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+## Screenshots
 
-## Step 1: Start Metro
+<div style="display: flex; justify-content: space-around; flex-wrap: wrap;">
+  <img src="/api/placeholder/180/360" alt="Home Screen" width="180" />
+  <img src="/api/placeholder/180/360" alt="Search Results" width="180" />
+  <img src="/api/placeholder/180/360" alt="Event Details" width="180" />
+  <img src="/api/placeholder/180/360" alt="Favorites Screen" width="180" />
+</div>
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+## Features
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+- **Event Discovery**: Search for events by keyword
+- **Event Details**: View comprehensive information about each event
+- **Favorites System**: Save your favorite events for quick access
+- **Dark Mode Support**: Automatic theme switching based on device settings
+- **Responsive Design**: Works on various screen sizes
 
-```sh
-# Using npm
-npm start
+## Tech Stack
 
-# OR using Yarn
-yarn start
+- **React Native**: Cross-platform mobile framework
+- **TypeScript**: For type safety and better developer experience
+- **Redux Toolkit**: State management with RTK Query for API calls
+- **React Navigation**: Navigation between screens
+- **MMKV Storage**: High-performance key-value storage
+- **Ticketmaster API**: Event data source
+
+## Project Structure
+
+```
+src/
+├── components/         # Reusable UI components
+├── navigation/         # Navigation configuration
+├── screens/            # Application screens
+├── services/           # API services using RTK Query
+├── store/              # Redux store setup
+├── styles/             # Theme and style utilities
+├── types/              # TypeScript type definitions
+└── utils/              # Helper functions and utilities
 ```
 
-## Step 2: Build and run your app
+## Setup Instructions
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+### Prerequisites
 
-### Android
+- Node.js (v14 or newer)
+- npm or yarn
+- React Native development environment
+- Ticketmaster API Key
 
-```sh
-# Using npm
-npm run android
+### Environment Setup
 
-# OR using Yarn
-yarn android
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/event-finder-app.git
+   cd event-finder-app
+   ```
+
+2. Install dependencies:
+   ```bash
+   yarn install
+   # or
+   npm install
+   ```
+
+3. Create a `.env` file in the root directory with your Ticketmaster API key:
+   ```
+   TICKETMASTER_API_KEY=your_api_key_here
+   ```
+
+### Running the App
+
+#### iOS
+
+```bash
+# Install pods
+npx pod-install ios
+
+# Run on iOS simulator
+npx react-native run-ios
 ```
 
-### iOS
+#### Android
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
-bundle install
+```bash
+# Run on Android emulator or connected device
+npx react-native run-android
 ```
 
-Then, and every time you update your native dependencies, run:
+## Design Decisions
 
-```sh
-bundle exec pod install
-```
+### State Management
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+I chose Redux Toolkit with RTK Query for several reasons:
 
-```sh
-# Using npm
-npm run ios
+1. **Centralized API Logic**: RTK Query handles caching, loading states, and error handling.
+2. **Reduced Boilerplate**: Fewer lines of code compared to traditional Redux.
+3. **TypeScript Integration**: Excellent type safety throughout the data flow.
 
-# OR using Yarn
-yarn ios
-```
+### Storage Solution
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+MMKV was selected over AsyncStorage because:
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+1. **Performance**: Much faster reading and writing of data.
+2. **Type Safety**: Better integration with TypeScript.
+3. **Bundle Size**: Smaller impact on the app's size.
 
-## Step 3: Modify your app
+### Theme System
 
-Now that you have successfully run the app, let's make changes!
+The app includes a custom theme system that:
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+1. **Responds to System Changes**: Automatically adapts between light and dark mode.
+2. **Consistent Color Palette**: Ensures visual harmony throughout the app.
+3. **Accessibility**: Maintains good contrast ratios in both theme modes.
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+### Navigation Architecture
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+React Navigation v6 was implemented with:
 
-## Congratulations! :tada:
+1. **Tab-based Main Flow**: Easy access to discover and favorites sections.
+2. **Stack Navigation**: Proper history management when viewing event details.
+3. **Type Safety**: Full TypeScript support for navigation props.
 
-You've successfully run and modified your React Native App. :partying_face:
+## Future Improvements
 
-### Now what?
+- Add location-based event discovery
+- Implement user authentication
+- Add calendar integration for saved events
+- Create push notifications for upcoming favorited events
+- Add ticket purchasing through deep linking
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
+## Demo Video
 
-# Troubleshooting
+[Watch the demo video](https://example.com/demo-video)
 
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+## License
 
-# Learn More
+MIT © [Your Name]
 
-To learn more about React Native, take a look at the following resources:
+## Acknowledgements
 
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+- [Ticketmaster API](https://developer.ticketmaster.com/products-and-docs/apis/discovery-api/v2/) for providing event data
+- [React Native Community](https://reactnative.dev/) for the amazing framework and tools
