@@ -1,6 +1,7 @@
 import {useEffect, useState} from 'react';
 import {Appearance, ColorSchemeName} from 'react-native';
 
+// Type definition for theme colors used throughout the app
 type ThemeColors = {
   primary: string;
   inactive: string;
@@ -20,6 +21,7 @@ type ThemeColors = {
   normalText: string;
 };
 
+// Light theme color palette
 const LightColors: ThemeColors = {
   primary: 'tomato',
   inactive: 'gray',
@@ -39,6 +41,7 @@ const LightColors: ThemeColors = {
   normalText: 'blue',
 };
 
+// Dark theme color palette
 const DarkColors: ThemeColors = {
   primary: 'tomato',
   inactive: '#888',
@@ -58,19 +61,25 @@ const DarkColors: ThemeColors = {
   normalText: '#6699ff',
 };
 
+// Helper function to select colors based on color scheme
 const getColors = (scheme: ColorSchemeName): ThemeColors =>
   scheme === 'dark' ? DarkColors : LightColors;
 
+// Custom hook that provides theme colors and responds to system theme changes
 const useColors = (): ThemeColors => {
+  // Initialize state with current system color scheme
   const [colors, setColors] = useState<ThemeColors>(
     getColors(Appearance.getColorScheme()),
   );
 
   useEffect(() => {
+    // Subscribe to system theme changes
     const subscription = Appearance.addChangeListener(({colorScheme}) => {
+      // Update colors when system theme changes
       setColors(getColors(colorScheme));
     });
 
+    // Clean up subscription when component unmounts
     return () => subscription.remove();
   }, []);
 

@@ -22,40 +22,46 @@ import FavoriteText from '../components/FavoriteText';
 import useColors from '../styles/colors';
 
 const DetailsScreen: React.FC<DetailsScreenProps> = ({route}) => {
+  // Extract event ID from route params
   const {id} = route.params;
+
+  // Fetch event details using RTK Query
   const {
     data: event,
     isLoading,
     isError,
     refetch,
   } = useGetEventDetailsQuery(id);
+
+  // Manage favorites using MMKV storage
   const [favorites, setFavorites] = useMMKVObject<Record<string, any>>(
     'favorites',
     storage,
   );
   const colors = useColors();
 
-  // Create an animated value for the favorite button
+  // Animation for favorite button
   const [scaleAnim] = useState(new Animated.Value(1));
 
+  // Check if current event is favorited
   const isFavorited = Boolean(favorites?.[id]);
 
+  // Toggle favorite with animation
   const toggleFavorite = () => {
-    // Sequence animation: scale up, then reset to 1
     Animated.sequence([
       Animated.timing(scaleAnim, {
-        toValue: 1.2, // Scale up when added, scale back when removed
-        duration: 150, // Faster animation (adjust the duration as needed)
+        toValue: 1.2,
+        duration: 150,
         useNativeDriver: true,
       }),
       Animated.timing(scaleAnim, {
-        toValue: 1, // Reset the scale to normal after scaling
-        duration: 100, // Faster reset
+        toValue: 1,
+        duration: 100,
         useNativeDriver: true,
       }),
     ]).start();
 
-    // Toggle favorite state
+    // Update favorites in storage
     setFavorites(prev => {
       const updated = {...(prev || {})};
       isFavorited ? delete updated[id] : (updated[id] = event);
@@ -63,13 +69,15 @@ const DetailsScreen: React.FC<DetailsScreenProps> = ({route}) => {
     });
   };
 
+  // Handle retry if fetch fails
   const handleRetry = () => refetch();
 
+  // Open ticket purchase URL
   const handleBuyTickets = () => {
     if (event?.url?.startsWith('http')) Linking.openURL(event.url);
-    else console.warn('Invalid URL');
   };
 
+  // Format classification info
   const classificationText = useMemo(() => {
     const c = event?.classifications?.[0];
     return [
@@ -85,6 +93,7 @@ const DetailsScreen: React.FC<DetailsScreenProps> = ({route}) => {
       .join(' • ');
   }, [event]);
 
+  // Loading state
   if (isLoading) {
     return (
       <View style={[styles.centered, {backgroundColor: colors.background}]}>
@@ -93,6 +102,7 @@ const DetailsScreen: React.FC<DetailsScreenProps> = ({route}) => {
     );
   }
 
+  // Error state
   if (isError || !event) {
     return (
       <View style={[styles.centered, {backgroundColor: colors.background}]}>
@@ -102,9 +112,11 @@ const DetailsScreen: React.FC<DetailsScreenProps> = ({route}) => {
     );
   }
 
+  // Destructure event data
   const {name, description, images, dates, _embedded, priceRanges, info, url} =
     event;
 
+  // Extract nested data
   const imageUrl = images?.[0]?.url;
   const venue = _embedded?.venues?.[0];
   const location = venue?.location;
@@ -113,6 +125,7 @@ const DetailsScreen: React.FC<DetailsScreenProps> = ({route}) => {
   return (
     <ScrollView
       style={[styles.container, {backgroundColor: colors.background}]}>
+      {/* Event image */}
       {imageUrl && (
         <Image
           source={{uri: imageUrl}}
@@ -122,19 +135,23 @@ const DetailsScreen: React.FC<DetailsScreenProps> = ({route}) => {
       )}
 
       <View style={styles.content}>
+        {/* Event title */}
         <Text style={[styles.title, {color: colors.text}]}>{name}</Text>
 
+        {/* Event description */}
         {description && (
           <Text style={[styles.infoText, {color: colors.subText}]}>
             {description}
           </Text>
         )}
 
+        {/* Event date/time */}
         <Text style={[styles.infoText, {color: colors.text}]}>
           {formatDate(dates.start.localDate)}
           {dates.start.localTime && ` at ${dates.start.localTime}`}
         </Text>
 
+        {/* Venue information */}
         {venue && (
           <>
             <Text style={[styles.infoText, {color: colors.text}]}>
@@ -147,24 +164,28 @@ const DetailsScreen: React.FC<DetailsScreenProps> = ({route}) => {
           </>
         )}
 
+        {/* Location coordinates */}
         {location && (
           <Text style={[styles.infoText, {color: colors.text}]}>
             Location: {location.latitude}, {location.longitude}
           </Text>
         )}
 
+        {/* Event classification */}
         {classificationText && (
           <Text style={[styles.infoText, {color: colors.text}]}>
             {classificationText}
           </Text>
         )}
 
+        {/* Price range */}
         {price && (
           <Text style={[styles.infoText, {color: colors.text}]}>
             ${price.min} - ${price.max}
           </Text>
         )}
 
+        {/* Additional info */}
         {info && (
           <View style={styles.section}>
             <Text style={[styles.sectionTitle, {color: colors.text}]}>
@@ -176,6 +197,7 @@ const DetailsScreen: React.FC<DetailsScreenProps> = ({route}) => {
           </View>
         )}
 
+        {/* Action buttons */}
         <View style={styles.buttonsRow}>
           {url && (
             <Pressable
@@ -191,12 +213,13 @@ const DetailsScreen: React.FC<DetailsScreenProps> = ({route}) => {
             </Pressable>
           )}
 
-          {/* Animated Favorite Button */}
+          {/* Animated favorite button */}
           <Animated.View style={{transform: [{scale: scaleAnim}]}}>
             <FavoriteText isFavorite={isFavorited} onPress={toggleFavorite} />
           </Animated.View>
         </View>
 
+        {/* Map view (iOS only) */}
         {location && Platform.OS === 'ios' && (
           <View style={styles.mapContainer}>
             <MapView
@@ -223,6 +246,7 @@ const DetailsScreen: React.FC<DetailsScreenProps> = ({route}) => {
   );
 };
 
+// Style definitions
 const styles = StyleSheet.create({
   container: {flex: 1},
   centered: {flex: 1, justifyContent: 'center', alignItems: 'center'},

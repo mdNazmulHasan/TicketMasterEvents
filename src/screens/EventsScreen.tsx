@@ -14,14 +14,19 @@ import {EventsScreenProps} from '@navigation/types';
 import useColors from '../styles/colors';
 
 const EventsScreen: React.FC<EventsScreenProps> = ({navigation}) => {
+  // Theme colors
   const colors = useColors();
+
+  // Search state
   const [keyword, setKeyword] = useState('');
   const [page, setPage] = useState(0);
   const [events, setEvents] = useState([]);
   const [hasMore, setHasMore] = useState(true);
 
+  // RTK Query lazy search
   const [triggerSearch, {isFetching, isError}] = useLazySearchEventsQuery();
 
+  // Fetch events with pagination support
   const fetchEvents = async (reset = false) => {
     const nextPage = reset ? 0 : page + 1;
 
@@ -29,15 +34,17 @@ const EventsScreen: React.FC<EventsScreenProps> = ({navigation}) => {
       const newEvents = await triggerSearch({keyword, page: nextPage}).unwrap();
 
       if (reset) {
+        // Reset results for new search
         setEvents(newEvents);
         setPage(0);
         setHasMore(true);
       } else {
+        // Append results for pagination
         if (newEvents.length > 0) {
           setEvents(prev => [...prev, ...newEvents]);
           setPage(nextPage);
         } else {
-          setHasMore(false);
+          setHasMore(false); // No more results
         }
       }
     } catch (err) {
@@ -46,16 +53,19 @@ const EventsScreen: React.FC<EventsScreenProps> = ({navigation}) => {
     }
   };
 
+  // Handle search submission
   const handleSearch = () => {
-    if (!keyword.trim()) return;
-    fetchEvents(true);
+    if (!keyword.trim()) return; // Ignore empty searches
+    fetchEvents(true); // Reset pagination
   };
 
+  // Load more events when scrolling
   const loadMoreEvents = () => {
-    if (!hasMore || isFetching) return;
+    if (!hasMore || isFetching) return; // Prevent duplicate calls
     fetchEvents();
   };
 
+  // Loading indicator for pagination
   const renderFooter = () =>
     isFetching && page > 0 ? (
       <ActivityIndicator
@@ -65,6 +75,7 @@ const EventsScreen: React.FC<EventsScreenProps> = ({navigation}) => {
       />
     ) : null;
 
+  // Empty state message
   const renderEmpty = () =>
     !isFetching && events.length === 0 ? (
       <Text style={[styles.emptyText, {color: colors.subText}]}>
@@ -74,13 +85,17 @@ const EventsScreen: React.FC<EventsScreenProps> = ({navigation}) => {
 
   return (
     <View style={[styles.container, {backgroundColor: colors.background}]}>
+      {/* Search input */}
       <TextInput
         style={[styles.input, {color: colors.text, borderColor: colors.border}]}
         placeholder="Search events"
         placeholderTextColor={colors.placeholder}
         value={keyword}
         onChangeText={setKeyword}
+        onSubmitEditing={handleSearch} // Allow keyboard submit
       />
+
+      {/* Search button */}
       <Button
         title="Search Events"
         onPress={handleSearch}
@@ -88,17 +103,20 @@ const EventsScreen: React.FC<EventsScreenProps> = ({navigation}) => {
         color={colors.primary}
       />
 
+      {/* Error/loading/result states */}
       {isError ? (
         <Text style={[styles.errorText, {color: colors.error}]}>
           Error loading events. Please try again.
         </Text>
       ) : isFetching && page === 0 ? (
+        // Initial loading indicator
         <ActivityIndicator
           size="large"
           color={colors.primary}
           style={styles.loader}
         />
       ) : (
+        // Results list
         <FlatList
           data={events}
           keyExtractor={item => item.id}
@@ -108,10 +126,10 @@ const EventsScreen: React.FC<EventsScreenProps> = ({navigation}) => {
               onPress={() => navigation.navigate('Detail', {id: item.id})}
             />
           )}
-          contentContainerStyle={{paddingBottom: 20, paddingTop: 20}}
+          contentContainerStyle={styles.flatListContentContainerStyle}
           onEndReached={loadMoreEvents}
           showsVerticalScrollIndicator={false}
-          onEndReachedThreshold={0.5}
+          onEndReachedThreshold={0.5} // Trigger load more halfway through list
           ListFooterComponent={renderFooter}
           ListEmptyComponent={renderEmpty}
         />
@@ -120,6 +138,7 @@ const EventsScreen: React.FC<EventsScreenProps> = ({navigation}) => {
   );
 };
 
+// Styles
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -148,6 +167,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
     fontSize: 16,
   },
+  flatListContentContainerStyle: {paddingBottom: 20, paddingTop: 20},
 });
 
 export default EventsScreen;
