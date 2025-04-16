@@ -1,35 +1,41 @@
 // src/navigation/TabNavigator.tsx
 import React from 'react';
-import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import {TabParamList} from './types';
-import EventsScreen from '../screens/EventsScreen';
-import FavoritesScreen from '../screens/FavoritesScreen';
-import useColors from '../styles/colors';
+import {createBottomTabNavigator} from '@react-navigation/bottom-tabs'; // Bottom tab navigator
+import {TabParamList} from './types'; // Type definitions for tab screens
+import EventsScreen from '../screens/EventsScreen'; // Events screen component
+import FavoritesScreen from '../screens/FavoritesScreen'; // Favorites screen component
+import useColors from '../styles/colors'; // Hook to get theme-based colors
 
+// Create a typed bottom tab navigator
 const Tab = createBottomTabNavigator<TabParamList>();
 
 const TabNavigator: React.FC = () => {
-  const Colors = useColors();
+  const Colors = useColors(); // Get color palette based on theme
+
   return (
+    // Set up the bottom tab navigator
     <Tab.Navigator
       screenOptions={{
-        tabBarIcon: () => null,
-        tabBarActiveTintColor: Colors.primary,
-        tabBarInactiveTintColor: Colors.inactive,
+        tabBarIcon: () => null, // Hide default icons (optional)
+        tabBarActiveTintColor: Colors.primary, // Color for active tab label
+        tabBarInactiveTintColor: Colors.inactive, // Color for inactive tab label
         tabBarLabelStyle: {
           fontSize: 14,
           fontWeight: '500',
-          paddingBottom: 5,
+          paddingBottom: 5, // Slight bottom padding for labels
         },
         tabBarStyle: {
-          height: 60,
+          height: 60, // Height of the bottom tab bar
         },
       }}>
+      {/* Tab for Events screen */}
       <Tab.Screen
         name="Events"
         component={EventsScreen}
         options={{title: 'Events'}}
       />
+
+      {/* Tab for Favorites screen */}
       <Tab.Screen
         name="Favorites"
         component={FavoritesScreen}
