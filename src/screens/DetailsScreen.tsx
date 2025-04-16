@@ -9,6 +9,7 @@ import {
   Button,
   StyleSheet,
   Pressable,
+  Platform,
 } from 'react-native';
 import MapView, {Marker} from 'react-native-maps';
 import {useGetEventDetailsQuery} from '../services/eventApi';
@@ -172,7 +173,7 @@ const DetailsScreen: React.FC<DetailsScreenProps> = ({route}) => {
           <FavoriteText isFavorite={isFavorited} onPress={toggleFavorite} />
         </View>
 
-        {location && (
+        {location && Platform.OS === 'ios' && (
           <View style={styles.mapContainer}>
             <MapView
               style={styles.map}
