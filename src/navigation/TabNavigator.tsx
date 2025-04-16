@@ -22,10 +22,16 @@ const TabNavigator: React.FC = () => {
         tabBarLabelStyle: {
           fontSize: 14,
           fontWeight: '500',
-          paddingBottom: 5, // Slight bottom padding for labels
+          marginTop: -20, // Remove padding
         },
         tabBarStyle: {
           height: 60, // Height of the bottom tab bar
+          justifyContent: 'center', // Center vertically
+          alignItems: 'center', // Center horizontally (optional)
+        },
+        tabBarItemStyle: {
+          justifyContent: 'center', // Center each item
+          alignItems: 'center',
         },
       }}>
       {/* Tab for Events screen */}
