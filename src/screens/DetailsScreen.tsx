@@ -45,8 +45,19 @@ const DetailsScreen: React.FC<DetailsScreenProps> = ({route}) => {
   } = event;
 
   const venue = _embedded?.venues?.[0];
-  const genre = classifications?.[0]?.genre?.name;
-  const segment = classifications?.[0]?.segment?.name;
+  const classification = classifications?.[0];
+  const parts = [
+    classification?.segment?.name,
+    classification?.genre?.name,
+    classification?.subGenre?.name,
+    classification?.type?.name,
+    classification?.subType?.name,
+  ]
+    .filter(
+      part =>
+        typeof part === 'string' && part.trim() !== '' && part !== 'Undefined',
+    )
+    .join(' • ');
   const price = priceRanges?.[0];
 
   const handleBuyTickets = () => {
@@ -81,9 +92,9 @@ const DetailsScreen: React.FC<DetailsScreenProps> = ({route}) => {
           </>
         )}
 
-        {(genre || segment) && (
+        {parts && (
           <Text style={styles.infoText}>
-            {[genre, segment].filter(Boolean).join(' • ')}
+            {parts}
           </Text>
         )}
 

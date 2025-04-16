@@ -1,5 +1,5 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { EventsResponse, Event } from '../types/eventTypes';
+import {createApi, fetchBaseQuery} from '@reduxjs/toolkit/query/react';
+import {EventsResponse, Event} from '../types/eventTypes';
 
 const API_KEY = process.env.TICKETMASTER_API_KEY ?? '';
 
@@ -15,7 +15,7 @@ export const eventApi = createApi({
   }),
   endpoints: builder => ({
     searchEvents: builder.query<Event[], SearchEventsArgs>({
-      query: ({ keyword, page = 0 }) => ({
+      query: ({keyword, page = 0}) => ({
         url: 'events.json',
         params: {
           apikey: API_KEY,
