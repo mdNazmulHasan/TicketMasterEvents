@@ -18,6 +18,15 @@ export interface Classification {
   segment: {
     name: string;
   };
+  subGenre: {
+    name: string;
+  };
+  type: {
+    name: string;
+  };
+  subType: {
+    name: string;
+  };
 }
 
 export interface PriceRange {

@@ -9,24 +9,24 @@ interface EventCardProps {
 }
 
 const EventCard: React.FC<EventCardProps> = ({event, onPress}) => {
-  const imageUrl =
-    event.images?.find(img => img.ratio === '3_2')?.url ||
-    event.images?.[0]?.url;
-
-  const venueName = event._embedded?.venues?.[0]?.name;
+  const imageUrl = getImageUrl(event);
   const date = formatDate(event.dates.start.localDate);
+  const venueName = event._embedded?.venues?.[0]?.name;
+  const classificationText = getClassificationText(event);
 
   return (
     <TouchableOpacity onPress={onPress} style={styles.card}>
       {imageUrl && <Image source={{uri: imageUrl}} style={styles.image} />}
-
       <View style={styles.content}>
         <Text style={styles.title} numberOfLines={2}>
           {event.name}
         </Text>
-
         <Text style={styles.date}>{date}</Text>
-
+        {classificationText && (
+          <Text style={styles.infoText} numberOfLines={1}>
+            {classificationText}
+          </Text>
+        )}
         {venueName && (
           <Text style={styles.venue} numberOfLines={1}>
             {venueName}
@@ -36,6 +36,36 @@ const EventCard: React.FC<EventCardProps> = ({event, onPress}) => {
     </TouchableOpacity>
   );
 };
+
+// ===== Helper Functions =====
+
+const getImageUrl = (event: Event): string | undefined => {
+  return (
+    event.images?.find(img => img.ratio === '3_2')?.url ||
+    event.images?.[0]?.url
+  );
+};
+
+const getClassificationText = (event: Event): string => {
+  const classification = event.classifications?.[0];
+
+  const parts = [
+    classification?.segment?.name,
+    classification?.genre?.name,
+    classification?.subGenre?.name,
+    classification?.type?.name,
+    classification?.subType?.name,
+  ];
+
+  return parts
+    .filter(
+      part =>
+        typeof part === 'string' && part.trim() !== '' && part !== 'Undefined',
+    )
+    .join(' • ');
+};
+
+// ===== Styles =====
 
 const styles = StyleSheet.create({
   card: {
@@ -63,6 +93,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     marginTop: 4,
+  },
+  infoText: {
+    fontSize: 14,
+    color: '#444',
+    marginTop: 2,
   },
   venue: {
     fontSize: 14,
