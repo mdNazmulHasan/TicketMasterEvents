@@ -9,8 +9,7 @@ const storage = new MMKV();
 
 const FavoritesScreen: React.FC<FavoritesScreenProps> = ({navigation}) => {
   const [favorites, setFavorites] = useState<Event[]>([]);
-
-  useEffect(() => {
+  const getSavedFavorites = () => {
     const stored = storage.getString('favorites');
 
     if (stored) {
@@ -28,7 +27,17 @@ const FavoritesScreen: React.FC<FavoritesScreenProps> = ({navigation}) => {
     } else {
       console.log('🚀 No favorites found in storage'); // Debugging log
     }
-  }, []);
+  };
+
+  useEffect(() => {
+    // Retrieve favorite events from storage
+    getSavedFavorites();
+    const unsubscribe = navigation.addListener('focus', () => {
+      // Refresh favorites when the screen is focused
+      getSavedFavorites();
+    });
+    return unsubscribe;
+  }, [navigation]);
 
   const renderItem = ({item}: {item: Event}) => (
     <EventCard
