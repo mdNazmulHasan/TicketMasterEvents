@@ -126,7 +126,7 @@ React Navigation v7 was implemented with:
 
 ## Demo Video
 
-[Watch the demo video](https://youtube.com/shorts/yqQoRlsPqF0?feature=share)
+[Watch the demo video](https://youtube.com/shorts/8yDDLRZLtgI?feature=share)
 
 ## License
 
