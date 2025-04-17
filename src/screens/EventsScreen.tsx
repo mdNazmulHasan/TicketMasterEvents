@@ -22,6 +22,7 @@ const EventsScreen: React.FC<EventsScreenProps> = ({navigation}) => {
   const colors = useColors();
 
   const [keyword, setKeyword] = useState('');
+  const [city, setCity] = useState('');
   const [page, setPage] = useState(0);
   const [events, setEvents] = useState([]);
   const [hasMore, setHasMore] = useState(true);
@@ -30,19 +31,33 @@ const EventsScreen: React.FC<EventsScreenProps> = ({navigation}) => {
 
   const [triggerSearch, {isFetching, isError}] = useLazySearchEventsQuery();
 
-  const fetchEvents = async (reset = false, searchKeyword = keyword.trim()) => {
+  const fetchEvents = async (
+    reset = false,
+    searchKeyword = keyword.trim(),
+    searchCity = city.trim(),
+  ) => {
     const nextPage = reset ? 0 : page + 1;
+
     try {
-      const newEvents = await triggerSearch({keyword: searchKeyword, page: nextPage}).unwrap();
+      const newEvents = await triggerSearch({
+        keyword: searchKeyword,
+        city: searchCity,
+        page: nextPage,
+      }).unwrap();
+
       setHasAttemptedSearch(true);
+
       if (reset) {
         setEvents(newEvents);
         setPage(0);
         setHasMore(true);
       } else {
-        setEvents(prev => [...prev, ...newEvents]);
-        if (newEvents.length === 0) setHasMore(false);
-        else setPage(nextPage);
+        if (newEvents.length > 0) {
+          setEvents(prev => [...prev, ...newEvents]);
+          setPage(nextPage);
+        } else {
+          setHasMore(false);
+        }
       }
     } catch (err) {
       console.error('Event fetch error:', err);
@@ -55,7 +70,7 @@ const EventsScreen: React.FC<EventsScreenProps> = ({navigation}) => {
   }, []);
 
   const handleSearch = () => {
-    if (!keyword.trim()) return;
+    if (!keyword.trim() && !city.trim()) return;
     fetchEvents(true);
   };
 
@@ -66,9 +81,10 @@ const EventsScreen: React.FC<EventsScreenProps> = ({navigation}) => {
 
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
-    setKeyword('');
     try {
-      await fetchEvents(true, DEFAULT_KEYWORD);
+      setKeyword('');
+      setCity('');
+      await fetchEvents(true, DEFAULT_KEYWORD, '');
     } finally {
       setRefreshing(false);
     }
@@ -76,10 +92,44 @@ const EventsScreen: React.FC<EventsScreenProps> = ({navigation}) => {
 
   const renderFooter = () =>
     isFetching && page > 0 ? (
-      <ActivityIndicator size="small" color={colors.primary} style={styles.footerLoader} />
+      <ActivityIndicator
+        size="small"
+        color={colors.primary}
+        style={styles.footerLoader}
+      />
     ) : null;
 
-  const renderEmptyOrError = (isErrorView: boolean = false) => (
+  const renderEmpty = () => {
+    if (isFetching && page === 0) return null;
+
+    return (
+      <ScrollView
+        contentContainerStyle={styles.emptyContainer}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            colors={[colors.primary]}
+            tintColor={colors.primary}
+          />
+        }>
+        <Text style={[styles.emptyText, {color: colors.subText}]}>
+          {hasAttemptedSearch
+            ? 'No events found.'
+            : 'Search for events to get started.'}
+        </Text>
+        {hasAttemptedSearch && (
+          <TouchableOpacity
+            style={[styles.refreshButton, {backgroundColor: colors.primary}]}
+            onPress={handleRefresh}>
+            <Text style={styles.refreshButtonText}>Refresh</Text>
+          </TouchableOpacity>
+        )}
+      </ScrollView>
+    );
+  };
+
+  const renderError = () => (
     <ScrollView
       contentContainerStyle={styles.emptyContainer}
       refreshControl={
@@ -90,17 +140,13 @@ const EventsScreen: React.FC<EventsScreenProps> = ({navigation}) => {
           tintColor={colors.primary}
         />
       }>
-      <Text style={[styles.emptyText, {color: isErrorView ? colors.error : colors.subText}]}>
-        {isErrorView
-          ? 'Error loading events. Please try again.'
-          : hasAttemptedSearch
-          ? 'No events found.'
-          : 'Search for events to get started.'}
+      <Text style={[styles.errorText, {color: colors.error}]}>
+        Error loading events. Please try again.
       </Text>
       <TouchableOpacity
         style={[styles.refreshButton, {backgroundColor: colors.primary}]}
         onPress={handleRefresh}>
-        <Text style={styles.refreshButtonText}>{isErrorView ? 'Try Again' : 'Refresh'}</Text>
+        <Text style={styles.refreshButtonText}>Try Again</Text>
       </TouchableOpacity>
     </ScrollView>
   );
@@ -109,30 +155,44 @@ const EventsScreen: React.FC<EventsScreenProps> = ({navigation}) => {
     <View style={[styles.container, {backgroundColor: colors.background}]}>
       <TextInput
         style={[styles.input, {color: colors.text, borderColor: colors.border}]}
-        placeholder="Search events"
+        placeholder="Search by keyword"
         placeholderTextColor={colors.placeholder}
         value={keyword}
         onChangeText={setKeyword}
         onSubmitEditing={handleSearch}
       />
-
+      <TextInput
+        style={[styles.input, {color: colors.text, borderColor: colors.border}]}
+        placeholder="Search by city"
+        placeholderTextColor={colors.placeholder}
+        value={city}
+        onChangeText={setCity}
+        onSubmitEditing={handleSearch}
+      />
       <Button
         title="Search Events"
         onPress={handleSearch}
-        disabled={!keyword.trim() || isFetching}
+        disabled={(!keyword.trim() && !city.trim()) || isFetching}
         color={colors.primary}
       />
 
       {isError ? (
-        renderEmptyOrError(true)
+        renderError()
       ) : isFetching && page === 0 && !refreshing ? (
-        <ActivityIndicator size="large" color={colors.primary} style={styles.loader} />
+        <ActivityIndicator
+          size="large"
+          color={colors.primary}
+          style={styles.loader}
+        />
       ) : events.length > 0 ? (
         <FlatList
           data={events}
           keyExtractor={item => item.id}
           renderItem={({item}) => (
-            <EventCard event={item} onPress={() => navigation.navigate('Detail', {id: item.id})} />
+            <EventCard
+              event={item}
+              onPress={() => navigation.navigate('Detail', {id: item.id})}
+            />
           )}
           contentContainerStyle={styles.flatListContentContainerStyle}
           onEndReached={loadMoreEvents}
@@ -149,7 +209,7 @@ const EventsScreen: React.FC<EventsScreenProps> = ({navigation}) => {
           }
         />
       ) : (
-        renderEmptyOrError()
+        renderEmpty()
       )}
     </View>
   );
@@ -180,6 +240,11 @@ const styles = StyleSheet.create({
     paddingTop: 60,
   },
   emptyText: {
+    textAlign: 'center',
+    fontSize: 16,
+    marginBottom: 20,
+  },
+  errorText: {
     textAlign: 'center',
     fontSize: 16,
     marginBottom: 20,
