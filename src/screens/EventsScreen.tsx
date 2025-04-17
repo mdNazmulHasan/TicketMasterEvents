@@ -1,4 +1,4 @@
-import React, {useState, useCallback} from 'react';
+import React, {useState, useCallback, useEffect} from 'react';
 import {
   View,
   TextInput,
@@ -16,11 +16,11 @@ import EventCard from '../components/EventCard';
 import {EventsScreenProps} from '@navigation/types';
 import useColors from '../styles/colors';
 
+const DEFAULT_KEYWORD = ''; // Can be changed to 'upcoming' or 'all'
+
 const EventsScreen: React.FC<EventsScreenProps> = ({navigation}) => {
-  // Theme colors
   const colors = useColors();
 
-  // Search state
   const [keyword, setKeyword] = useState('');
   const [page, setPage] = useState(0);
   const [events, setEvents] = useState([]);
@@ -28,35 +28,29 @@ const EventsScreen: React.FC<EventsScreenProps> = ({navigation}) => {
   const [refreshing, setRefreshing] = useState(false);
   const [hasAttemptedSearch, setHasAttemptedSearch] = useState(false);
 
-  // RTK Query lazy search
   const [triggerSearch, {isFetching, isError}] = useLazySearchEventsQuery();
 
-  // Fetch events with pagination support
-  const fetchEvents = async (reset = false) => {
-    if (!keyword.trim() && reset) {
-      setEvents([]);
-      setPage(0);
-      return;
-    }
-
+  const fetchEvents = async (reset = false, searchKeyword = keyword.trim()) => {
     const nextPage = reset ? 0 : page + 1;
 
     try {
-      const newEvents = await triggerSearch({keyword, page: nextPage}).unwrap();
+      const newEvents = await triggerSearch({
+        keyword: searchKeyword,
+        page: nextPage,
+      }).unwrap();
+
       setHasAttemptedSearch(true);
 
       if (reset) {
-        // Reset results for new search
         setEvents(newEvents);
         setPage(0);
         setHasMore(true);
       } else {
-        // Append results for pagination
         if (newEvents.length > 0) {
           setEvents(prev => [...prev, ...newEvents]);
           setPage(nextPage);
         } else {
-          setHasMore(false); // No more results
+          setHasMore(false);
         }
       }
     } catch (err) {
@@ -65,35 +59,29 @@ const EventsScreen: React.FC<EventsScreenProps> = ({navigation}) => {
     }
   };
 
-  // Handle search submission
+  useEffect(() => {
+    fetchEvents(true, DEFAULT_KEYWORD);
+  }, []);
+
   const handleSearch = () => {
-    if (!keyword.trim()) return; // Ignore empty searches
-    fetchEvents(true); // Reset pagination
+    if (!keyword.trim()) return;
+    fetchEvents(true);
   };
 
-  // Load more events when scrolling
   const loadMoreEvents = () => {
-    if (!hasMore || isFetching) return; // Prevent duplicate calls
+    if (!hasMore || isFetching) return;
     fetchEvents();
   };
 
-  // Handle pull-to-refresh
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
-      // Re-fetch the current search results from page 0
       await fetchEvents(true);
     } finally {
       setRefreshing(false);
     }
   }, [keyword]);
 
-  // Try again handler for error state
-  const handleTryAgain = () => {
-    handleRefresh();
-  };
-
-  // Loading indicator for pagination
   const renderFooter = () =>
     isFetching && page > 0 ? (
       <ActivityIndicator
@@ -103,7 +91,6 @@ const EventsScreen: React.FC<EventsScreenProps> = ({navigation}) => {
       />
     ) : null;
 
-  // Empty state with refresh capability
   const renderEmpty = () => {
     if (isFetching && page === 0) return null;
 
@@ -134,7 +121,6 @@ const EventsScreen: React.FC<EventsScreenProps> = ({navigation}) => {
     );
   };
 
-  // Error state with refresh capability
   const renderError = () => (
     <ScrollView
       contentContainerStyle={styles.emptyContainer}
@@ -151,7 +137,7 @@ const EventsScreen: React.FC<EventsScreenProps> = ({navigation}) => {
       </Text>
       <TouchableOpacity
         style={[styles.refreshButton, {backgroundColor: colors.primary}]}
-        onPress={handleTryAgain}>
+        onPress={handleRefresh}>
         <Text style={styles.refreshButtonText}>Try Again</Text>
       </TouchableOpacity>
     </ScrollView>
@@ -159,17 +145,15 @@ const EventsScreen: React.FC<EventsScreenProps> = ({navigation}) => {
 
   return (
     <View style={[styles.container, {backgroundColor: colors.background}]}>
-      {/* Search input */}
       <TextInput
         style={[styles.input, {color: colors.text, borderColor: colors.border}]}
         placeholder="Search events"
         placeholderTextColor={colors.placeholder}
         value={keyword}
         onChangeText={setKeyword}
-        onSubmitEditing={handleSearch} // Allow keyboard submit
+        onSubmitEditing={handleSearch}
       />
 
-      {/* Search button */}
       <Button
         title="Search Events"
         onPress={handleSearch}
@@ -177,18 +161,15 @@ const EventsScreen: React.FC<EventsScreenProps> = ({navigation}) => {
         color={colors.primary}
       />
 
-      {/* Error/loading/result states */}
       {isError ? (
         renderError()
       ) : isFetching && page === 0 && !refreshing ? (
-        // Initial loading indicator
         <ActivityIndicator
           size="large"
           color={colors.primary}
           style={styles.loader}
         />
       ) : events.length > 0 ? (
-        // Results list
         <FlatList
           data={events}
           keyExtractor={item => item.id}
@@ -200,8 +181,8 @@ const EventsScreen: React.FC<EventsScreenProps> = ({navigation}) => {
           )}
           contentContainerStyle={styles.flatListContentContainerStyle}
           onEndReached={loadMoreEvents}
+          onEndReachedThreshold={0.5}
           showsVerticalScrollIndicator={false}
-          onEndReachedThreshold={0.5} // Trigger load more halfway through list
           ListFooterComponent={renderFooter}
           refreshControl={
             <RefreshControl
@@ -213,14 +194,12 @@ const EventsScreen: React.FC<EventsScreenProps> = ({navigation}) => {
           }
         />
       ) : (
-        // Empty state
         renderEmpty()
       )}
     </View>
   );
 };
 
-// Styles
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -256,8 +235,8 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   flatListContentContainerStyle: {
-    paddingBottom: 20,
     paddingTop: 20,
+    paddingBottom: 20,
   },
   refreshButton: {
     paddingHorizontal: 20,
