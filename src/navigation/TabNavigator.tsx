@@ -16,18 +16,18 @@ const TabNavigator: React.FC = () => {
     // Set up the bottom tab navigator
     <Tab.Navigator
       screenOptions={{
-        tabBarIcon: () => null, // Hide default icons (optional)
+        tabBarIcon: () => null, // Hide default icons
         tabBarActiveTintColor: Colors.primary, // Color for active tab label
         tabBarInactiveTintColor: Colors.inactive, // Color for inactive tab label
         tabBarLabelStyle: {
           fontSize: 14,
           fontWeight: '500',
-          marginTop: -20, // Remove padding
+          marginTop: -20, // Adjust label position
         },
         tabBarStyle: {
           height: 60, // Height of the bottom tab bar
           justifyContent: 'center', // Center vertically
-          alignItems: 'center', // Center horizontally (optional)
+          alignItems: 'center', // Center horizontally
         },
         tabBarItemStyle: {
           justifyContent: 'center', // Center each item
